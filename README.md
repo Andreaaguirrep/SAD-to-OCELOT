@@ -23,7 +23,7 @@ A simple Python GUI tool to convert **SAD (.sad) lattice files** into **OCELOT-c
 Run:
 
 ```bash
-python convert_sad_to_ocelot.py input_file.sad
+python sad_to_ocelot.py input_file.sad
 ```
 
 or as a GUI version:
