@@ -98,12 +98,26 @@ def process_stack(token_stack):
                 token_stack.pop()
                 in_element_def = False
             elif in_line:
+
+                # Detect negative operator FIRST
+                if token_stack[-1].type == "OP" and token_stack[-1].value == "-":
+                    token_stack.pop()  # remove '-'
+
+                    # Next token must be ID (negative element)
+                    if len(token_stack) > 0 and token_stack[-1].type == "ID":
+                        neg_id = token_stack.pop()
+                        # print(f"⚠️ Warning: Negative element detected in LINE: -{neg_id.value}")
+                        line_def.append(neg_id.value)
+                    continue
+
+                # Normal element
                 if token_stack[-1].type == "ID":
                     t1 = token_stack.pop()
                     line_def.append(t1.value)
-                elif token_stack[-1].type == "OP":
+
+                else:
                     token_stack.pop()
-                    token_stack.pop()
+
             elif len(token_stack) >= 3 and token_stack[-1].type == "ID" and token_stack[-2].type == "EQUAL" and token_stack[-3].type == "NUMBER":
                 t1 = token_stack.pop()
                 token_stack.pop()
@@ -193,6 +207,7 @@ def convert_sad_to_ocelot(input_file, output_file):
             elif o.type == "SEXT":
                 f.write(f"{o.name} = Sextupole(eid=\"{o.name}\",l={o.get_parameter('L')},k2={o.get_parameter('K2')},tilt={o.get_parameter('ROTATE')})\n")
             elif o.type == "MULT":
+                print(f"⚠️ Warning: MULT element detected and simplified to Quadrupole/Drift: {o.name}")
                 if o.get_parameter('L') > 0:
                     k1 = o.get_parameter('K1') / o.get_parameter('L')
                     f.write(f"{o.name} = Quadrupole(eid=\"{o.name}\",l={o.get_parameter('L')},k1={k1},tilt={o.get_parameter('ROTATE')})\n")
@@ -223,7 +238,16 @@ def convert_sad_to_ocelot(input_file, output_file):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert SAD file to OCELOT format")
     parser.add_argument("input", help="Path to the input SAD file")
-    parser.add_argument("-o", "--output", default="OcelotOutput.py", help="Output Python file (default: OcelotOutput.py)")
+    parser.add_argument("-o", "--output", help="Output Python file (default: same name as input with .py extension)")
     args = parser.parse_args()
 
-    convert_sad_to_ocelot(args.input, args.output)
+    # If no output specified, use input filename with .py extension
+    if args.output:
+        output_file = args.output
+    else:
+        if args.input.lower().endswith(".sad"):
+            output_file = args.input[:-4] + ".py"
+        else:
+            output_file = args.input + ".py"
+
+    convert_sad_to_ocelot(args.input, output_file)
