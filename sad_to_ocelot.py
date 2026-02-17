@@ -168,7 +168,10 @@ class SADObject:
             for token in tokenize(line + '\n'):
                 token_stack = [token] + token_stack
                 if token.type == "END":
-                    objs, line_def = process_stack(token_stack)
+                    objs, new_line_def = process_stack(token_stack)
+                    if new_line_def:
+                        line_def = new_line_def
+
                     token_stack.clear()
                     for o in objs:
                         object_defs.append(o)
