@@ -94,7 +94,7 @@ python sad_to_ocelot.py input_file.sad -o custom_output.py
 
 ### MULT Elements
 
-`MULT` elements in SAD are simplified:
+`MULT` elements in SAD are currently simplified during conversion:
 
 - If `L > 0` → converted to `Quadrupole`
 - If `L == 0` → converted to `Drift`
@@ -105,20 +105,11 @@ A warning is printed:
 ⚠️ Warning: MULT element detected and simplified to Quadrupole/Drift: ELEMENT_NAME
 ```
 
-BUT WE HAVE DISCOVERED THIS MULTIPOLES CAN BE CAVITIES WITH ELEMENTS ON TOP. If you encounter multipoles you can contact us.
+⚠️ **Important:** During development we discovered that some `MULT` elements in certain SAD lattices may actually represent RF cavity structures or composite elements with additional embedded components.
 
----
+Because of this, automatic simplification may remove important physics.
 
-### MAP / APERT / COORD
-
-These are converted to `Marker` elements.
-
-This means:
-
-- No aperture limits are preserved
-- No nonlinear maps are preserved
-- They act only as reference position
-
+If you encounter `MULT` elements in your lattice, please verify their physical meaning before using the converted file for detailed beam dynamics studies. You may contact the repository maintainer for clarification or support.
 
 ---
 
